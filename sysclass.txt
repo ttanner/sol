@@ -1,0 +1,132 @@
+System-Klassen:
+------------------------------------------------------------------------------
+Modul (Object)
+ references		Integer
+ imports		List of Modul
+	Wenn Modulversion neuer->neucompileren
+ globals		List of Assoc
+	Globals/Constants
+ classes		List of Class
+	Klassen
+ genericMethods		List of GenericMethod
+ methods		List of Methods
+ initialisation 	Method
+ options		Integer
+ version		Time
+	Zeit der letzten globalen Änderung
+ purpose		List of Object
+	Namen & (Klassen,Methoden)
+------------------------------------------------------------------------------
+Global/Constant (Assoc?)
+ modul			Modul
+	für Link
+ [name]			String
+	Global groß,Constant klein
+ [value]		Object
+	Global read&write, Constant read only
+------------------------------------------------------------------------------
+Class (Object)
+ modul			Modul
+	für Link
+ name			String
+	Name
+ superClasses		List of Class
+	Superklassen
+ rootDist		Integer
+	max. Distanz zu Object
+ precedenceList 	List of Class
+	von dieser Klasse ausgehend wird jeweils erste Erscheinung in den
+	Superklassen aufgenommen
+ precedenceInfo		List of 2*Integer
+	Level der Klassen und Anzahl der Vorkommnisse der Klasse
+ classStart		List of Integer
+	Start der Instanzvariablen der Klassen
+ instVars		Integer
+	Anzahl der InstVars (gesamt)
+ instVarNames		List of String
+	Namen der eigenen InstVars
+ options		Integer
+	Optionen (isByte,isPointer,isSystem,deferred,...)
+ comment		String/Text
+ ?changes		List of ClassChange
+	InstVar +,-,umben., Super +,- (Änderung=glob. Änderung)
+ ?creation		Time
+	Erzeugung
+ ?version		Time
+	letzte Änderung
+------------------------------------------------------------------------------
+GenericMethod (List)
+ modul			Modul
+	für Link
+ selector		String
+	Selector
+ <methods>		Method
+	Methoden
+------------------------------------------------------------------------------
+Methods (GenericMethod)
+ genericMethod		GenericMethod
+ <methods>		Method
+	Methoden
+------------------------------------------------------------------------------
+Method (Object)
+ paramClasses		List of Class
+	Parameterklassen: Distanz(param-paramClass) muß >=0 sein.
+ rootDistSum		Integer
+	Summe der rootDist aller Parameterklassen
+ comment		String/Text
+	Kommentar
+ ?priority		Integer
+	bei gleicher dist: wird nacheinander gewählt
+------------------------------------------------------------------------------
+CompiledMethod (Method,ByteList)
+ literals	List of String,Integer,Real,GenericMethod,Global,Constant
+ temporaries		Integer
+	Anzahl der temporören Variablen
+ maxStack		Integer
+	max. Stackgröße (durch push/pop)
+ source			String/Text
+	Quellcode
+ <code>			Byte
+	Bytecodes
+------------------------------------------------------------------------------
+PrimitiveMethod (Method)
+ primitive		Integer
+	Nr. der Primitive
+ ?primClass		Integer
+	Nr. der Klasse der Primitive (Object,Integer,Real,List,...)
+------------------------------------------------------------------------------
+Context (List)
+ caller			Context
+	der Aufrufende (nil=Systemende)
+ IP			Integer
+	instruction pointer
+ TP			Integer
+	temporary pointer
+ SP			Integer
+	stack pointer
+ method			Method
+ castList		List of
+	upCasts für Parameter (std=nil)
+			 (sp,class)
+ <stack>		Object
+	Stack
+------------------------------------------------------------------------------
+BlockContext (Context)
+ fatherContext		Context
+	Erzeuger des Blocks (unabhängig=nil)
+ homeContext		Context
+	Methodenkontext
+------------------------------------------------------------------------------
+Block (Object)
+ fatherContext		Context
+	Erzeuger des Blocks (unabhängig=nil)
+ homeContext		Context
+	Methodenkontext
+ parameters		Integer
+	Anzahl der Parameter
+ temporaries		Integer
+	Anzahl der temporären Variablen
+ maxStack		Integer         max. Stackgröße (durch push/pop)
+------------------------------------------------------------------------------
+
+

@@ -1,0 +1,213 @@
+Befehl/Bits		Parameter/Code
+------------------------------------------------------------------------------
+push
+
+ 00001xxx		system constant
+			 value := {nil,true,false,-2,-1,0,1,2} at: x+1.
+
+ 0010xxxx 		literal constant
+ 00000001 x              value := (literals at: x+1) shallowCopy.
+
+ 0011xxxx 		global/constant
+ 00000010 x		 value := (literals at: x+1) value.
+
+ 0100xxxx		parameter
+			 value := stack at: 2 * x + 1.
+
+ 0101xxxx y		instvar
+			 value := (stack at: 2 * x + 1)
+				   atInstVar: y + (stack at: 2 * x + 2).
+
+ 0110xxxx		temporary
+ 00000011 x              value := stack at: tp + x.
+
+ 0111bbbb x		block parameter/temporary
+			 value := (getBlock: b) at: x+1.
+
+ 1000xxxx yyyzzzzz j	block
+			 value := Block new
+				   initFather: context
+					 home: homeContext
+					 params: y
+					 tmps: x
+					 stack: z.
+			 ip := ip + j.
+
+	sp:= sp + 1.
+	stack at: sp put: value.
+
+cast
+
+ 00010011 c i
+			castList insert: (literals at: c).
+			castList insert: i.
+			castList insert: sp.
+
+------------------------------------------------------------------------------
+pop/store
+			top := stack at: sp.
+
+ 00010000		nowhere
+			 sp := sp - 1.
+
+ 1001xxxx 		global
+ 00010001 x              (literals at: x+1) value: top.
+
+ 1010xxxx y		instvar
+			 (stack at: 2 * x + 1)
+			  atInstVar: y + (stack at: 2 * x + 2) put: top.
+
+ 1011xxxx		temporary
+ 00010010 x              stack at: tp + x put: top.
+
+ 1100bbbb x		block temporary
+			 (getBlock: b) at: x+1 put: value.
+
+ 00000110 j		pop and jump true
+			 if: (stack at: sp) then:[ ip := ip + j - 128].
+			 sp := sp - 1.
+
+ 00000111 j		pop and jump false
+			 ifNot: (stack at: sp) then:[ ip := ip + j - 128].
+			 sp := sp - 1.
+
+------------------------------------------------------------------------------
+call
+
+ 1101pppp m		method
+ 00000100 p m m
+			 | tmp pp cast |
+			 paramClasses := List new: p.
+			 sp - p to: sp do:
+			  [°i paramClasses insert: (stack at: i) class ].
+			 if: castList ## nil then:
+			  [ tmp:= castList size.
+			    while:[ (pp := castList at: tmp ) > sp - p ] do:
+			     [ cast := castList at: tmp - 1.
+			       ifNot: ((paramClasses at: pp) isKindOf: cast)
+				then:[^ CastError new ].
+			       paramClasses at: pp put: cast.
+			       tmp:= tmp - 2 ].
+			    castList resizeTo: tmp
+			  ].
+			  findMethod: (literals at: m) forParams: paramClasses.
+			  if: foundMethod == nil then:[^ CallError new ].
+			  newContext := MethodContext
+					 new: foundMethod->maxStack.
+			  newContext initCaller: context
+				      method: foundMethod
+				      params: (stack copyFrom: sp - p to: sp)
+				      instVarAdd: instVarAdd.
+			  context := newContext.
+
+ 1110ssss 		special
+ 00000101 s s 		 (Special at: s) run.
+
+------------------------------------------------------------------------------
+return
+
+ 00010100		return
+
+			 top := stack at: sp.
+			 save := context.
+			 if: (context is: BlockContext)
+			  then:[ context := homeContext ].
+			 context := caller.
+			 save->caller := nil.
+			 sp := sp + 1.
+			 stack at: sp put: top.
+
+ 00010101		return block
+
+			 top := stack at: sp.
+			 save := context.
+			 context := caller.
+			 save->caller := nil.
+			 sp := sp + 1.
+			 stack at: sp put: top.
+
+------------------------------------------------------------------------------
+jump
+ 00010110 j
+			 ip := ip + j - 128.
+
+store to list
+ 00010111 i		 value := stack at: sp.
+			 sp := sp - 1.
+			 (stack at: sp) basicAt: i put: value.
+
+nop
+
+ 00000000
+------------------------------------------------------------------------------
+reserved
+
+ 00010111-00011111 (8)
+ 11110000-11111111 (16)
+
+------------------------------------------------------------------------------
+
+ method (params,literal)
+			16 + 256
+			256 + 65536
+ special
+			16
+			65536
+ system constant
+			8	{nil,true,false,-2,-1,0,1,2}
+ literal constant
+			16
+			256
+ global/constant
+			16
+			256
+ parameter
+			16
+ instvar (param,ofs)
+			16 + 256
+ temporary
+			16
+			256
+ block parameter/temporary (block,param) (block: 0=akt 1=super 2=super2 ...)
+			16 + 256
+ block (params,tmps,stack,jump)
+			8 + 16 + 32 + 256
+ jump			-128..+127
+
+------------------------------------------------------------------------------
+
+ 00000000		nop
+ 00000001 x		push literal constant
+ 00000010 x		push global/constant
+ 00000011 x		push temporary
+ 00000100 a m m 	call method
+ 00000101 s s		call special
+ 00000110 j		pop and jump true
+ 00000111 j		pop and jump false
+ 00001xxx		push system constant
+
+ 00010000		pop nowhere
+ 00010001 x		pop global
+ 00010010 x		pop temporary
+ 00010011 c i		cast
+ 00010100		return
+ 00010101		return block
+ 00010110 j		jump
+ 00010111 i		store to list
+ 00011000		do block
+ 00011001-00011111 (6)  reserved
+
+ 0010xxxx 		push literal constant
+ 0011xxxx 		push global/constant
+ 0100xxxx		push parameter
+ 0101xxxx y		push instvar
+ 0110xxxx		push temporary
+ 0111bbbb x		push block parameter/temporary
+ 1000xxxx yyyzzzzz j	push block
+ 1001xxxx 		pop global
+ 1010xxxx y		pop instvar
+ 1011xxxx		pop temporary
+ 1100bbbb x		pop block temporary
+ 1101pppp m		call method
+ 1110ssss 		call special
+ 11110000-11111111 (16) reserved

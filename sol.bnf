@@ -1,0 +1,65 @@
+Scanner rules:
+
+LittleLetter	= "a".."z".
+BigLetter	= "A".."Z".
+Digit		= "0".."9".
+Symbol		= '+' | '*' | '/' | '\'
+		| "<" | ">" | "=" | "#"
+		| '&' | '|' | '~'.
+Letter		= BigLetter | LittleLetter.
+BigDigit	= Digit | BigLetter.
+Digits		= Digit {Digit}.
+BigDigits	= BigDigit {BigDigit}.
+Character	= "$" ?.
+Comment		= """" { ? | """""" } """".
+String		= "'" { ? | "''"} "'".
+Number		= [Digits "r"] ["-"] BigDigits
+		  ["." BigDigits]["e" ["-"] Digits].
+Local		= LittleLetter {Letter | Digit}.
+Global		= BigLetter    {Letter | Digit}.
+UnarySelector	= Local.
+BinarySelector	= Symbol {Symbol} | "-".
+Keyword		= Local ":".
+
+-----------------------------------------------------------
+Parser rules:
+
+Variable	= Global | Local {"->" Global} ["->" Local].
+Literal		= Number | Character | String | Array.
+Primary		= Literal | Variable | Block | "(" Expressions ")".
+Array		= "{" [Expression {"," Expression}] "}".
+UnaryExpression	= Primary {UnarySelector}.
+BinaryExpression= UnaryExpression {BinarySelector UnaryExpression}.
+KeywordExpression= Keyword {BinaryExpression Keyword} BinaryExpression
+		 | BinaryExpression {Keyword BinaryExpression}.
+Expression	= {Variable ":="} KeywordExpression.
+Expressions	= Expression {"." Expression}.
+Temporaries	= "|" {Local} "|".
+Statements	= [Temporaries] [Expressions ["."]] ["^" Expression ["."]].
+BlockParameter	= ":" Local.
+Block		= "[" {BlockParameter} Statements "]".
+Instance	= Local "->" Global.
+Syntax		= Instance UnarySelector
+		| Instance BinarySelector Instance
+		| Instance {Keyword Instance}
+		| Keyword {Instance Keyword} Instance.
+Special		= "#" ("DEFERRED" | "PRIMITIVE" Global Number).
+Method		= Syntax "." (Statements | Special).
+
+-----------------------------------------------------------
+
+Class		= Global "(" {Global} ")" {Local}.
+Purpose		= "#" ("PUBLIC"
+		     | "PRIVATE"
+		     | "PURPOSE" String {"," String}).
+
+Import		= "IMPORT" {Global}+ "@".
+Header		= "MODUL" Global [Import].
+Classes		= "CLASSES" {Purpose | Class  "@"} "@".
+Globals		= "GLOBALS" {Purpose | Global} "@".
+Methods		= "METHODS" {Purpose | Method "@"} "@".
+Init		= "INIT" Statements "@".
+
+Modul		= Header { Classes | Globals | Methods | Init } "END".
+
+

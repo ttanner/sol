@@ -1,0 +1,119 @@
+
+Object:
+  1: a->Object == b->Object.
+  2: a->Object shallowEqual: b->Object.
+  3: obj->Object shallowCopy.
+  4: obj->Object hash.
+  5: obj->Object atInstVar: index->Integer.
+  6: obj->Object atInstVar: index->Integer put: value->Object.
+ByteList:
+  1: l->ByteList basicAt: index->Integer.
+  2: l->ByteList basicAt: index->Integer put: value->Integer.
+  3: l->ByteList basicFillSpace: count->Integer at: start->Integer with: value->Integer.
+  4: l->ByteList basicMoveSpace: count->Integer from: srcPos->Integer to: destPos->Integer.
+  5: l->ByteList indexOf: value->Integer startingAt: start->Integer.
+  6: l->ByteList limit.
+  7: l->ByteList setLimit: limit->Integer.
+String:
+  1: s->String basicAt: index->Integer.
+  2: s->String basicAt: index->Integer put: value->Character.
+  3: s->String basicFillSpace: count->Integer at: start->Integer with: value->Character.
+  4: s->String basicMoveSpace: count->Integer from: srcPos->Integer to: destPos->Integer.
+  5: s->String indexOf: value->Character startingAt: start->Integer.
+  6: s->String limit.
+  7: s->String setLimit: limit->Integer.
+List:
+  1: l->List basicAt: index->Integer.
+  2: l->List basicAt: index->Integer put: value->Object.
+  3: l->List basicFillSpace: count->Integer at: start->Integer with: value->Object.
+  4: l->List basicMoveSpace: count->Integer from: srcPos->Integer to: destPos->Integer.
+  5: l->List indexOf: value->Object startingAt: start->Integer.
+  6: l->List limit.
+  7: l->List setLimit: limit->Integer.
+Character:
+  1: Integer->c asCharacter.
+  2: Character->c asASCII.
+Time:
+  1: Time->time now.
+SmallInteger:
+  1: a->SmallInteger = b->SmallInteger.
+  2: a->SmallInteger < b->SmallInteger.
+  3: a->SmallInteger > b->SmallInteger.
+  4: a->SmallInteger + b->SmallInteger.
+  5: a->SmallInteger - b->SmallInteger.
+  6: a->SmallInteger * b->SmallInteger.
+  7: a->SmallInteger // b->SmallInteger.
+  8: a->SmallInteger \\ b->SmallInteger.
+  9: i->SmallInteger & mask->SmallInteger.
+ 10: i->SmallInteger | mask->SmallInteger.
+ 11: i->SmallInteger ~ mask->SmallInteger.
+ 12: i->SmallInteger << shift->SmallInteger.
+ 13: i->SmallInteger >> shift->SmallInteger.
+ 14: i->SmallInteger bitSize.
+ 15: i->SmallInteger asLargeInteger.
+ 16: i->SmallInteger asReal.
+LargeInteger:
+  1: a->LargeInteger = b->LargeInteger.
+  2: a->LargeInteger < b->LargeInteger.
+  3: a->LargeInteger > b->LargeInteger.
+  4: a->LargeInteger + b->LargeInteger.
+  5: a->LargeInteger + b->LargeInteger.
+  6: a->LargeInteger * b->LargeInteger.
+  7: a->LargeInteger // b->LargeInteger.
+  8: a->LargeInteger \\ b->LargeInteger.
+  9: i->LargeInteger & mask->LargeInteger.
+ 10: i->LargeInteger | mask->LargeInteger.
+ 11: i->LargeInteger ~ mask->LargeInteger.
+ 12: i->LargeInteger << shift->SmallInteger.
+ 13: i->LargeInteger >> shift->SmallInteger.
+ 14: i->LargeInteger bitSize.
+ 15: i->LargeInteger simplified.
+ 16: i->LargeInteger asReal.
+Real:
+  1: a->Real = b->Real.
+  2: a->Real < b->Real.
+  3: a->Real > b->Real.
+  4: a->Real + b->Real.
+  5: a->Real - b->Real.
+  6: a->Real * b->Real.
+  7: a->Real / b->Real.
+  8: r->Real basicSqrt.
+  9: r->Real exp.
+ 10: r->Real basicLn.
+ 11: r->Real sin.
+ 12: r->Real cos.
+ 13: r->Real arcTan.
+ 14: r->Real int.
+ 15: r->Real frac.
+Class:
+  1: class->Class create.
+  2: obj->Object class.
+Block:
+  1: block->Block do.
+  2: block->Block doWith: obj->Object.
+  3: block->Block doWith: a->Object and: b->Object.
+  4: block->Block doWithParams: params->List.
+Boolean:
+  1: a->Boolean & b->Boolean.
+  2: a->Boolean | b->Boolean.
+  3: a->Boolean ~ b->Boolean.
+  4: b->Boolean not.
+Error:
+  1: error->Error raise.
+  2: try: action->Block ifError: handle->Block.
+Test:
+  1: s->String print.
+
+97 primitives
+
+-------------------------------------------------------------------------
+compiler:
+  if: condition->Boolean then: action->Block.
+  if: condition->Boolean then: trueBlock->Block else: falseBlock->Block.
+  while: condition->Block do: action->Block.
+  whileNot: condition->Block do: action->Block.
+  do: action->Block while: condition->Block.
+  do: action->Block whileNot: condition->Block.
+  a->Boolean & b->Block.
+  a->Boolean | b->Block.
+  a->Boolean ~ b->Block.
